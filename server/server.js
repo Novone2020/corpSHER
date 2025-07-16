@@ -48,7 +48,7 @@ app.get('/v/:code', async (req, res) => {
   }
 });
 
-app.listen(3001, '0.0.0.0', () => {
+app.listen(3001, () => {
   console.log('Server is running on port 3001');
 });
 
