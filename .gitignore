@@ -1,29 +1,3 @@
-# === Global ===
-node_modules/
-.env
-.DS_Store
-Thumbs.db
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+**/node_modules
 
-# === Client (React) ===
-client/build/
-client/.env
-client/node_modules/
-client/.cache/
-client/.DS_Store
-
-# === Server (Node.js) ===
-server/node_modules/
-server/.env
-server/.DS_Store
-
-# === OS & Editor Files ===
-*.swp
-*.swo
-*.swn
-*~
-.vscode/
-.idea/
+*/.env

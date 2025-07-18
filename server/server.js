@@ -2,13 +2,29 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import shortid from 'shortid';
+import dotenv from 'dotenv';
 import Video from './models/Video.js';
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect('mongodb+srv://shubziverse:B6sURxAaWYlq3zKe@cluster7.acr3rmn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster7');
+const PORT = process.env.PORT || 3001;
+
+// Connect to MongoDB and only start the server if successful
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log('✅ MongoDB connected');
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+    process.exit(1); // Exit the app if DB connection fails
+  });
 
 app.post('/api/videos', async (req, res) => {
   const { url, videoId } = req.body;
@@ -47,8 +63,3 @@ app.get('/v/:code', async (req, res) => {
     res.status(404).send('Video not found');
   }
 });
-
-app.listen(3001, () => {
-  console.log('Server is running on port 3001');
-});
-
