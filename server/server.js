@@ -1,9 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import shortid from 'shortid';
 import dotenv from 'dotenv';
 import Video from './models/Video.js';
+import shortid from 'shortid';
 
 dotenv.config();
 
@@ -13,7 +13,6 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
-// Connect to MongoDB and only start the server if successful
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB connected');
@@ -23,13 +22,15 @@ mongoose.connect(process.env.MONGO_URI)
   })
   .catch(err => {
     console.error('❌ MongoDB connection error:', err);
-    process.exit(1); // Exit the app if DB connection fails
+    process.exit(1);
   });
 
 app.post('/api/videos', async (req, res) => {
-  const { url, videoId } = req.body;
+  const { url, videoId, code } = req.body;
+  if (!code) return res.status(400).json({ error: 'Secret code required' });
+
   try {
-    const video = new Video({ url, videoId });
+    const video = new Video({ url, videoId, code, shortcode: shortid.generate() });
     await video.save();
     res.status(201).json(video);
   } catch (err) {
@@ -38,8 +39,11 @@ app.post('/api/videos', async (req, res) => {
 });
 
 app.get('/api/videos', async (req, res) => {
+  const { code } = req.query;
+  if (!code) return res.status(400).json({ error: 'Code is required' });
+
   try {
-    const videos = await Video.find().sort({ addedAt: -1 });
+    const videos = await Video.find({ code }).sort({ addedAt: -1 });
     res.json(videos);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch history' });
@@ -62,4 +66,12 @@ app.get('/v/:code', async (req, res) => {
   } else {
     res.status(404).send('Video not found');
   }
+});
+
+app.post('/api/code', async (req, res) => {
+  const { code } = req.body;
+  if (!code) return res.status(400).json({ error: 'Code is required' });
+
+  const exists = await Video.exists({ code });
+  res.json({ exists });
 });
